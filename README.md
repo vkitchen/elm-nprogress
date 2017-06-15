@@ -6,6 +6,6 @@ See [nprogress](https://github.com/rstacruz/nprogress) for more information.
 
 ## Usage
 
-For usage, see the [example project](src/main.elm).
+For usage, see the [example project](src/Main.elm).
 
-To see it working. Download and open index.html
+Or for a [live demonstration](https://vkitchen.github.io/elm-nprogress/).
