@@ -19,7 +19,7 @@ type alias Model =
 
 
 init =
-  ( { progress = Progress.init, loading = False }, Cmd.none )
+  ( { progress = Progress.init, loading = True }, Cmd.none )
 
 
 type Msg
@@ -33,13 +33,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     Start ->
-      ( { model | loading = True, progress = Progress.init }, Cmd.none)
+      ( { model | progress = Progress.start }, Cmd.none)
 
     Done ->
       ( { model | progress = Progress.done model.progress }, Cmd.none)
 
     Loaded ->
-      ( { model | loading = False }, Cmd.none)
+      ( { model | progress = Progress.init, loading = False }, Cmd.none)
 
     SetProgress newState ->
       ( { model | progress = newState }
@@ -50,9 +50,14 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div []
-    ([ button [ onClick Start ] [ text "Start" ]
+    [ Progress.view config model.progress
+    , button [ onClick Start ] [ text "Start" ]
     , button [ onClick Done ] [ text "Done" ]
-    ] ++ if model.loading then [Progress.view config model.progress] else [])
+    , if model.loading then
+        text ""
+      else
+        text "Page has loaded"
+    ]
 
 
 config : Progress.Config Msg
@@ -64,10 +69,7 @@ config =
 
 
 subscriptions model =
-  if model.loading then
-    Progress.subscriptions config model.progress
-  else
-    Sub.none
+  Progress.subscriptions config model.progress
 
 
 main =
