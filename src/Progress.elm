@@ -1,4 +1,4 @@
-module Progress exposing (Config, State, config, init, start, done, view, subscriptions)
+module Progress exposing (Config, State, config, init, start, update, done, view, subscriptions)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -15,12 +15,12 @@ type State =
 
 type Config msg =
   Config
-    { toMsg : State -> msg
+    { toMsg : msg
     , toLoaded : msg
     }
 
 
-config : { toMsg : State -> msg, toLoaded : msg } -> Config msg
+config : { toMsg : msg, toLoaded : msg } -> Config msg
 config { toMsg, toLoaded } =
   Config
     { toMsg = toMsg
@@ -36,6 +36,28 @@ init =
 start : State
 start =
   State True False 0
+
+
+update : State -> State
+update (State running d n) =
+  case d of
+    False ->
+      if n < 0.2 then
+        State True False (n + 0.1)
+      else if n < 0.5 then
+        State True False (n + 0.04)
+      else if n < 0.8 then
+        State True False (n + 0.02)
+      else if n < 0.99 then
+        State True False (n + 0.005)
+      else
+        State True False n
+    True ->
+      -- at least one extra inverval after the bar finishes
+      if n < 2 then
+        State True True (n + 0.8)
+      else
+        State True True n
 
 
 done : State -> State
@@ -54,21 +76,10 @@ subscriptions (Config { toMsg, toLoaded }) (State running d n) =
       increase _ =
         case d of
           False ->
-            toMsg <|
-              if n < 0.2 then
-                State True False (n + 0.1)
-              else if n < 0.5 then
-                State True False (n + 0.04)
-              else if n < 0.8 then
-                State True False (n + 0.02)
-              else if n < 0.99 then
-                State True False (n + 0.005)
-              else
-                State True False n
+            toMsg
           True ->
-            -- at least one extra inverval after the bar finishes
             if n < 2 then
-              State True True (n + 0.8) |> toMsg
+              toMsg
             else
               toLoaded
     in

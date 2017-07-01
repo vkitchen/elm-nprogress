@@ -26,14 +26,14 @@ type Msg
   = Start
   | Done
   | Loaded
-  | SetProgress Progress.State
+  | UpdateProgress
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     Start ->
-      ( { model | progress = Progress.start }, Cmd.none)
+      ( { model | progress = Progress.start, loading = True }, Cmd.none)
 
     Done ->
       ( { model | progress = Progress.done model.progress }, Cmd.none)
@@ -41,8 +41,8 @@ update msg model =
     Loaded ->
       ( { model | progress = Progress.init, loading = False }, Cmd.none)
 
-    SetProgress newState ->
-      ( { model | progress = newState }
+    UpdateProgress ->
+      ( { model | progress = Progress.update model.progress }
       , Cmd.none
       )
 
@@ -63,7 +63,7 @@ view model =
 config : Progress.Config Msg
 config =
   Progress.config
-    { toMsg = SetProgress
+    { toMsg = UpdateProgress
     , toLoaded = Loaded
     }
 
